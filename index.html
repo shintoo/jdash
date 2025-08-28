@@ -346,6 +346,19 @@
             display: none;
         }
 
+        .article-site-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            margin: 1em;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 400px;
+            padding: 2px 5px;
+            font-size: .6em;
+            font-weight: bold;
+            color: white;
+        }
+
         .article-card:hover .article-read-check-overlay {
             display: flex;
         }
@@ -494,14 +507,6 @@
 
         }
 
-        .bubble {
-            width: 25px;
-            height: 25px;
-            border: 2px solid white;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 100%;
-        }
-
         * {
             scrollbar-width: none;
         }
@@ -579,201 +584,183 @@
             </div>
         </div>
 
+        <script>
+            const ankiSettingsBtn = document.getElementById('ankiSettingsBtn');
+            const closeAnkiSettingsBtn = document.getElementById("closeAnkiSettingsBtn");
+            const ankiSettingsPanel = document.getElementById('ankiSettingsPanel');
+            const saveAnkiSettingsBtn = document.getElementById('saveAnkiSettings');
+            const refreshAnkiBtn = document.getElementById('refreshAnki');
+            const ankiServerInput = document.getElementById('ankiServer');
+            const ankiDeckInput = document.getElementById('ankiDeck');
+            const reviewCountEl = document.getElementById('reviewCount');
+            const newCountEl = document.getElementById('newCount');
+            const learningCountEl = document.getElementById('learningCount');
+            const addedWordsEl = document.getElementById('addedWords');
+            const articlesContainer = document.getElementById('articlesContainer');
+            const youtubeChannelsList = document.getElementById('youtubeChannelsList');
+            const greetingEl = document.getElementById("greeting")
 
-        <!--
-        <div class="card" style="margin-top: 15px">
-            <div class="link-list">
-                <a href="https://jpdb.io/" target="_blank" class="link-item">jpdb/a>
-                <a href="https://www3.nhk.or.jp/nhkworld/en/news/" target="_blank" class="link-item">NHK World News</a>
-                <a href="https://www.tetsudo.com/" target="_blank" class="link-item">Tetsudo.com</a>
-            </div>
-        </div>
+            const greetings = [
+                "今日も頑張ろうね！", "何か面白い記事を読んでみて！勉強になるはずだからね", "動画を観よう！",
+                "読めば読むほど頭が良くなるでしょ？", "あんき復習を忘れないでね！"
+            ]
 
-        <div class="footer">
-            <p>Japanese Learning Dashboard • Refreshed just now</p>
-        </div>
-        -->
-    </div>
+            // Configuration
+            let config = {
+                ankiServer: 'http://127.0.0.1:8765',
+                ankiDeck: '1 - Japanese Vocab Mining',
+                youtubeChannels: [
+                    {
+                        "name": "かほの登山日記",
+                        "url": "https://www.youtube.com/@kaho_tozan",
+                        "image": "kaho.jpg"
+                    },
+                    {
+                        "name": "くが",
+                        "url": "https://www.youtube.com/@kuga1832",
+                        "image": "kuga.jpg"
+                    },
+                    {
+                        "name": "牛沢",
+                        "url": "https://www.youtube.com/@uszw",
+                        "image": "ushizawa.jpg"
+                    }
+                ],
+                readArticles: [],
+                filteredWords: ["スペースX", "SpaceX", "Starship", "Elon"]
+            };
 
-    <!-- HTML code for bubbles can go here -->
-
-    <script>
-        // DOM Elements
-        const ankiSettingsBtn = document.getElementById('ankiSettingsBtn');
-        const closeAnkiSettingsBtn = document.getElementById("closeAnkiSettingsBtn");
-        const ankiSettingsPanel = document.getElementById('ankiSettingsPanel');
-        const saveAnkiSettingsBtn = document.getElementById('saveAnkiSettings');
-        const refreshAnkiBtn = document.getElementById('refreshAnki');
-        const ankiServerInput = document.getElementById('ankiServer');
-        const ankiDeckInput = document.getElementById('ankiDeck');
-        const reviewCountEl = document.getElementById('reviewCount');
-        const newCountEl = document.getElementById('newCount');
-        const learningCountEl = document.getElementById('learningCount');
-        const addedWordsEl = document.getElementById('addedWords');
-        const articlesContainer = document.getElementById('articlesContainer');
-        const youtubeChannelsList = document.getElementById('youtubeChannelsList');
-        const greetingEl = document.getElementById("greeting")
-
-        const greetings = [
-            "今日も頑張ろうね！", "何か面白い記事を読んでみて！勉強になるはずだからね", "動画を観よう！",
-            "読めば読むほど頭が良くなるでしょ？", "あんき復習を忘れないでね！"
-        ]
-
-        // Configuration
-        let config = {
-            ankiServer: 'http://127.0.0.1:8765',
-            ankiDeck: '1 - Japanese Vocab Mining',
-            youtubeChannels: [
-                {
-                    "name": "かほの登山日記",
-                    "url": "https://www.youtube.com/@kaho_tozan",
-                    "image": "kaho.jpg"
-                },
-                {
-                    "name": "くが",
-                    "url": "https://www.youtube.com/@kuga1832",
-                    "image": "kuga.jpg"
-                },
-                {
-                    "name": "牛沢",
-                    "url": "https://www.youtube.com/@uszw",
-                    "image": "ushizawa.jpg"
+            // Load config from localStorage
+            function loadConfig() {
+                const savedConfig = localStorage.getItem('japaneseDashboardConfig');
+                if (savedConfig) {
+                    config = JSON.parse(savedConfig);
+                    ankiServerInput.value = config.ankiServer;
+                    ankiDeckInput.value = config.ankiDeck;
                 }
-            ],
-            readArticles: [],
-            filteredWords: ["スペースX", "SpaceX", "Starship", "Elon"]
-        };
-
-        // Load config from localStorage
-        function loadConfig() {
-            const savedConfig = localStorage.getItem('japaneseDashboardConfig');
-            if (savedConfig) {
-                config = JSON.parse(savedConfig);
-                ankiServerInput.value = config.ankiServer;
-                ankiDeckInput.value = config.ankiDeck;
             }
-        }
 
-        // Save config to localStorage
-        function saveConfig() {
-            localStorage.setItem('japaneseDashboardConfig', JSON.stringify(config));
-        }
+            // Save config to localStorage
+            function saveConfig() {
+                localStorage.setItem('japaneseDashboardConfig', JSON.stringify(config));
+            }
 
-        // Toggle settings panels
-        ankiSettingsBtn.addEventListener('click', () => {
-            ankiSettingsPanel.classList.toggle('active');
-        });
+            // Toggle settings panels
+            ankiSettingsBtn.addEventListener('click', () => {
+                ankiSettingsPanel.classList.toggle('active');
+            });
 
-        closeAnkiSettingsBtn.addEventListener('click', () => {
-            ankiSettingsPanel.classList.toggle('active');
-        });
+            closeAnkiSettingsBtn.addEventListener('click', () => {
+                ankiSettingsPanel.classList.toggle('active');
+            });
 
-        // Save settings
-        saveAnkiSettingsBtn.addEventListener('click', () => {
-            config.ankiServer = ankiServerInput.value;
-            config.ankiDeck = ankiDeckInput.value;
-            saveConfig();
-            ankiSettingsPanel.classList.remove('active');
-            fetchAnkiData();
-        });
+            // Save settings
+            saveAnkiSettingsBtn.addEventListener('click', () => {
+                config.ankiServer = ankiServerInput.value;
+                config.ankiDeck = ankiDeckInput.value;
+                saveConfig();
+                ankiSettingsPanel.classList.remove('active');
+                fetchAnkiData();
+            });
 
-        // Refresh data
-        refreshAnkiBtn.addEventListener('click', fetchAnkiData);
+            // Refresh data
+            refreshAnkiBtn.addEventListener('click', fetchAnkiData);
 
-        // Fetch Anki data
-        async function fetchAnkiData() {
-            try {
-                // Get deck stats
-                const statsResponse = await fetch(config.ankiServer, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        action: 'getDeckStats',
-                        version: 6,
-                        params: {
-                            decks: [config.ankiDeck]
-                        }
-                    })
-                });
+            // Fetch Anki data
+            async function fetchAnkiData() {
+                try {
+                    // Get deck stats
+                    const statsResponse = await fetch(config.ankiServer, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'getDeckStats',
+                            version: 6,
+                            params: {
+                                decks: [config.ankiDeck]
+                            }
+                        })
+                    });
 
-                const statsData = await statsResponse.json();
-                const deckStats = Object.values(statsData.result)[0];
+                    const statsData = await statsResponse.json();
+                    const deckStats = Object.values(statsData.result)[0];
 
-                // Hide/show 乙 if we are done with Anki for now :-)
-                if (!deckStats.review_count && !deckStats.new_count && !deckStats.learn_count) {
-                    console.log("all 0s for anki")
-                    document.getElementById("ankiComplete").style.display = "flex";
-                    document.getElementById("statsContainer").style.display = "none";
-                } else {
-                    document.getElementById("ankiComplete").style.display = "none";
-                    document.getElementById("statsContainer").style.display = "flex";
-                }
+                    // Hide/show 乙 if we are done with Anki for now :-)
+                    if (!deckStats.review_count && !deckStats.new_count && !deckStats.learn_count) {
+                        console.log("all 0s for anki")
+                        document.getElementById("ankiComplete").style.display = "flex";
+                        document.getElementById("statsContainer").style.display = "none";
+                    } else {
+                        document.getElementById("ankiComplete").style.display = "none";
+                        document.getElementById("statsContainer").style.display = "flex";
+                    }
 
-                reviewCountEl.textContent = deckStats.review_count;
-                newCountEl.textContent = deckStats.new_count;
-                learningCountEl.textContent = deckStats.learn_count;
+                    reviewCountEl.textContent = deckStats.review_count;
+                    newCountEl.textContent = deckStats.new_count;
+                    learningCountEl.textContent = deckStats.learn_count;
 
-                // Get today's added notes
-                const notesResponse = await fetch(config.ankiServer, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        action: 'notesInfo',
-                        version: 6,
-                        params: {
-                            query: `deck:"${config.ankiDeck}" is:new added:1`
-                        }
-                    })
-                });
+                    // Get today's added notes
+                    const notesResponse = await fetch(config.ankiServer, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'notesInfo',
+                            version: 6,
+                            params: {
+                                query: `deck:"${config.ankiDeck}" is:new added:1`
+                            }
+                        })
+                    });
 
-                const notesData = await notesResponse.json();
-                const notes = notesData.result;
+                    const notesData = await notesResponse.json();
+                    const notes = notesData.result;
 
-                // Display added words
-                if (notes.length === 0) {
-                    addedWordsEl.innerHTML = '<div class="loading">新しい言葉を探しましょうね！</div>';
-                } else {
-                    addedWordsEl.innerHTML = '';
-                    notes.forEach(note => addedWordsEl.appendChild(html(`
+                    // Display added words
+                    if (notes.length === 0) {
+                        addedWordsEl.innerHTML = '<div class="loading">新しい言葉を探しましょうね！</div>';
+                    } else {
+                        addedWordsEl.innerHTML = '';
+                        notes.forEach(note => addedWordsEl.appendChild(html(`
                             <div class="word-item">${note.fields.Expression.value}</div>
                     `)));
+                    }
+                } catch (error) {
+                    console.error('Error fetching Anki data:', error);
+                    addedWordsEl.innerHTML = '<div class="error">Failed to load Anki data. Please check your settings, and ensure Anki is running with AnkiConnect installed.</div>';
                 }
-            } catch (error) {
-                console.error('Error fetching Anki data:', error);
-                addedWordsEl.innerHTML = '<div class="error">Failed to load Anki data. Please check your settings, and ensure Anki is running with AnkiConnect installed.</div>';
             }
-        }
 
-        // Fetch articles
-        async function fetchArticles() {
-            try {
-                const response = await fetch(`/articles`);
-                const data = await response.json();
+            // Fetch articles
+            async function fetchArticles() {
+                try {
+                    const response = await fetch(`/articles`);
+                    const data = await response.json();
 
-                if (!data.results || data.results.length === 0) {
-                    articlesContainer.innerHTML = '<div class="loading">No articles available</div>';
-                    return;
-                }
+                    if (!data.results || data.results.length === 0) {
+                        articlesContainer.innerHTML = '<div class="loading">No articles available</div>';
+                        return;
+                    }
 
-                let articles = []
-                data.results.forEach(website => website.articles.forEach(article => articles.push(article)))
-                shuffle(articles)
+                    let articles = []
+                    data.results.forEach(website => website.articles.forEach(article => articles.push(article)))
+                    shuffle(articles)
 
-                articlesContainer.innerHTML = '';
-                const articlesGrid = document.createElement('div');
-                articlesGrid.className = 'articles-grid';
+                    articlesContainer.innerHTML = '';
+                    const articlesGrid = document.createElement('div');
+                    articlesGrid.className = 'articles-grid';
 
-                // Display only unread articles
-                articles.forEach(article => {
-                    if (!config.readArticles.includes(article.link)) {
-                        articlesGrid.appendChild(html(`
+                    // Display only unread articles
+                    articles.forEach(article => {
+                        if (!config.readArticles.includes(article.link)) {
+                            articlesGrid.appendChild(html(`
                             <a class="article-card" href="${article.link}" target="_blank">
                                 <div class="article-image-container">
                                     <img class="article-image" src="${article.image}"></img>
+                                    <div class="article-site-overlay">${new URL(article.link).hostname.replace(/^www\./, '')}</div>
                                     <div class="article-read-check-overlay">
                                         <div id="${article.link}" class="article-read-checkbox"></div>
                                     </div>
@@ -784,73 +771,73 @@
                                 </div>
                             </a>
                         `))
-                    }
-                });
+                        }
+                    });
 
-                articlesContainer.appendChild(articlesGrid);
+                    articlesContainer.appendChild(articlesGrid);
 
-                // Add checked listener to each article
-                articles.forEach(article => {
-                    if (!config.readArticles.includes(article.link)) {
-                        document.getElementById(article.link).addEventListener("click", e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.target.classList.toggle("checked");
-                            e.target.innerHTML = `<i class="fa fa-check></i>`;
-                            e.target.closest(".article-card").style.display = "none";
-                            config.readArticles.push(article.link);
-                            saveConfig()
-                        }, true)
-                    }
-                })
+                    // Add checked listener to each article
+                    articles.forEach(article => {
+                        if (!config.readArticles.includes(article.link)) {
+                            document.getElementById(article.link).addEventListener("click", e => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.target.classList.toggle("checked");
+                                e.target.innerHTML = `<i class="fa fa-check></i>`;
+                                e.target.closest(".article-card").style.display = "none";
+                                config.readArticles.push(article.link);
+                                saveConfig()
+                            }, true)
+                        }
+                    })
 
-            } catch (error) {
-                console.error('Error fetching articles:', error);
-                articlesContainer.innerHTML = '<div class="error">Failed to load articles.</div>';
+                } catch (error) {
+                    console.error('Error fetching articles:', error);
+                    articlesContainer.innerHTML = '<div class="error">Failed to load articles.</div>';
+                    throw error;
+                }
+
             }
 
-        }
-
-        config.youtubeChannels.forEach(channel => youtubeChannelsList.appendChild(html(`
+            config.youtubeChannels.forEach(channel => youtubeChannelsList.appendChild(html(`
                 <a  class="youtube-channel" href="${channel.url}" target="_blank">
                     <img alt="" class="youtube-image" src="/static/img/yt/${channel.image}"></img>
                     <div class="youtube-name">${channel.name}</div>
                 </a>
             `))
-        )
+            )
 
-        function setGreeting() {
-            greetingEl.innerHTML = greetings[Math.floor(Math.random() * greetings.length)]
-        }
-
-        function shuffle(array) {
-            let currentIndex = array.length;
-            while (currentIndex != 0) {
-                let randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [
-                    array[randomIndex], array[currentIndex]];
+            function setGreeting() {
+                greetingEl.innerHTML = greetings[Math.floor(Math.random() * greetings.length)]
             }
-        }
 
-        function html(html) {
-            const template = document.createElement('template');
-            template.innerHTML = html.trim();
-            return template.content.firstChild;
-        }
+            function shuffle(array) {
+                let currentIndex = array.length;
+                while (currentIndex != 0) {
+                    let randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [
+                        array[randomIndex], array[currentIndex]];
+                }
+            }
 
-        function initDashboard() {
-            loadConfig();
-            console.log(config)
-            Promise.all([
-                fetchAnkiData(),
-                fetchArticles()
-            ]).then(setGreeting);
-            startBubbles()
-        }
+            function html(html) {
+                const template = document.createElement('template');
+                template.innerHTML = html.trim();
+                return template.content.firstChild;
+            }
 
-        window.addEventListener('DOMContentLoaded', initDashboard);
-    </script>
+            function initDashboard() {
+                loadConfig();
+                console.log(config)
+                Promise.all([
+                    fetchAnkiData(),
+                    fetchArticles()
+                ]).then(setGreeting);
+            }
+
+            window.addEventListener('DOMContentLoaded', initDashboard);
+        </script>
 </body>
 
 </html>
