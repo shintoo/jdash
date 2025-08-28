@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>日本語勉強しよう！</title>
+    <style>
+        :root {
+            --primary: #052f59;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #07294a;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --card-bg: #cfefff;
+            --border: #ddd;
+        }
+
+        @font-face {
+            font-family: 'my font';
+            src: url("/static/font/mitimasu.ttf");
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'my font', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #e4f6ff;
+            color: var(--primary);
+            line-height: 1.6;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 90vw;
+            width: 90vw;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            height: auto;
+            margin: 1em;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-start;
+            gap: 25px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .settings-btn {
+            background: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .settings-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            display: none;
+            position: absolute;
+            top: -5px;
+            right: 7px;
+            width: 80%;
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .articles-card {
+            height: 90vh;
+            max-height: 90vh;
+            overflow-y: scroll;
+        }
+
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .anki-complete {
+            width: 100%;
+            text-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 1em;
+            display: none;
+        }
+
+        .stat-card {
+            border-radius: 8px;
+            padding: 0 20px 20px 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1rem;
+            text-wrap: nowrap;
+        }
+
+        .review {
+            /*color: var(--secondary);*/
+            color: green;
+        }
+
+        .new {
+            color: blue;
+            /*var(--accent);*/
+        }
+
+        .learning {
+            color: red;
+            /*var(--warning);*/
+        }
+
+        .added-today {
+            margin-top: 20px;
+        }
+
+        .added-today h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-height: 125px;
+            overflow: scroll;
+            overflow-x: hidden;
+
+        }
+
+        .word-item {
+            background: #a6d9ff;
+            padding: 0 8px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+        }
+
+        .articles-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .website-section {
+            margin-bottom: 0px;
+        }
+
+        .website-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .website-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .website-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .articles-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .article-card {
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .article-image-container {
+            width: 320px;
+            height: 180px;
+            min-width: 320px;
+            min-height: 180px;
+            position: relative;
+        }
+
+        .article-image {
+            width: 320px;
+            height: 180px;
+            min-width: 320px;
+            min-height: 180px;
+            object-fit: cover;
+            display: block;
+            border-radius: 16px;
+        }
+
+        .article-read-check-overlay {
+            width: 320px;
+            height: 180px;
+            top: 0;
+            left: 0;
+            display: flex;
+            position: absolute;
+            display: none;
+        }
+
+        .article-card:hover .article-read-check-overlay {
+            display: flex;
+        }
+
+        .article-read-checkbox {
+            margin: 1em;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            background: var(--light);
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            box-sizing: border-box;
+        }
+
+        .article-read-checkbox.checked {
+            background: var(--success);
+        }
+
+        .article-body {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .article-title {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            color: var(--dark);
+        }
+
+        .article-summary {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            text-wrap: nowrap;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .link-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .link-item {
+            background: var(--secondary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .link-item:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .youtube-list {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            min-width: 280px;
+        }
+
+        .youtube-channel {
+            min-width: 115px;
+            text-decoration: none;
+            color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .youtube-image {
+            border-radius: 100%;
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+        }
+
+        .youtube-name {
+            text-wrap: nowrap;
+            font-weight: bold;
+        }
+
+        .study-partner {
+            position: relative;
+            align-self: flex-start;
+            width: 90%;
+            border: 2px solid white;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .greeting {
+            padding-right: 10px;
+        }
+
+        .study-partner-avatar {
+            border-radius: 10px;
+            position: absolute;
+            right: -60px;
+            top: 20px;
+            height: 160px;
+        }
+
+        .thought-bubble {
+            margin-top: -10px;
+            margin-right: -20px;
+            width: 25px;
+            height: 25px;
+            background: none;
+            border: 2px solid white;
+            border-radius: 100%;
+            background: rgba(255, 255, 255, 0.3);
+
+        }
+
+        .bubble {
+            width: 25px;
+            height: 25px;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 100%;
+        }
+
+        * {
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="dashboard">
+
+            <div class="card-container">
+                <div class="card articles-card">
+                    <div class="articles-container" id="articlesContainer">
+                        <div class="loading">Loading articles...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-container">
+                <div class="card">
+                    <button class="settings-btn" id="ankiSettingsBtn"><i class="fa fa-cog"></i></button>
+                    <div class="settings-panel" id="ankiSettingsPanel">
+                        <button class="settings-btn" id="closeAnkiSettingsBtn"><i class="fa fa-close"></i></button>
+                        <div class="form-group">
+                            <label for="ankiServer">AnkiConnect Server</label>
+                            <input type="text" id="ankiServer" value="http://127.0.0.1:8765">
+                        </div>
+                        <div class="form-group">
+                            <label for="ankiDeck">Deck Name</label>
+                            <input type="text" id="ankiDeck" value="1 - Japanese Vocab Mining">
+                        </div>
+                        <div class="button-group">
+                            <button id="saveAnkiSettings">Save Settings</button>
+                            <button id="refreshAnki" style="margin-left: 10px;">Refresh Data</button>
+                        </div>
+                    </div>
+
+                    <div class="anki-complete" id="ankiComplete">
+                        復習完了。お疲れ様！
+                    </div>
+                    <div id="statsContainer" class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-value new" id="newCount">0</div>
+                            <div class="stat-label">新規</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value learning" id="learningCount">0</div>
+                            <div class="stat-label">習得中</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value review" id="reviewCount">0</div>
+                            <div class="stat-label">復習</div>
+                        </div>
+                    </div>
+
+                    <div class="added-today">
+                        <h3>今日追加した単語</h3>
+                        <div class="word-list" id="addedWords">
+                            <div class="loading">読み込み中...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="youtube-list" id="youtubeChannelsList">
+                    </div>
+                </div>
+
+                <div class="card study-partner">
+                    <div id="greeting" class="greeting"></div>
+                    <img class="study-partner-avatar" src="/static/img/avatar.png"></img>
+                </div>
+
+                <div class="thought-bubble"></div>
+            </div>
+        </div>
+
+
+        <!--
+        <div class="card" style="margin-top: 15px">
+            <div class="link-list">
+                <a href="https://jpdb.io/" target="_blank" class="link-item">jpdb/a>
+                <a href="https://www3.nhk.or.jp/nhkworld/en/news/" target="_blank" class="link-item">NHK World News</a>
+                <a href="https://www.tetsudo.com/" target="_blank" class="link-item">Tetsudo.com</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Japanese Learning Dashboard • Refreshed just now</p>
+        </div>
+        -->
+    </div>
+
+    <!-- HTML code for bubbles can go here -->
+
+    <script>
+        // DOM Elements
+        const ankiSettingsBtn = document.getElementById('ankiSettingsBtn');
+        const closeAnkiSettingsBtn = document.getElementById("closeAnkiSettingsBtn");
+        const ankiSettingsPanel = document.getElementById('ankiSettingsPanel');
+        const saveAnkiSettingsBtn = document.getElementById('saveAnkiSettings');
+        const refreshAnkiBtn = document.getElementById('refreshAnki');
+        const ankiServerInput = document.getElementById('ankiServer');
+        const ankiDeckInput = document.getElementById('ankiDeck');
+        const reviewCountEl = document.getElementById('reviewCount');
+        const newCountEl = document.getElementById('newCount');
+        const learningCountEl = document.getElementById('learningCount');
+        const addedWordsEl = document.getElementById('addedWords');
+        const articlesContainer = document.getElementById('articlesContainer');
+        const youtubeChannelsList = document.getElementById('youtubeChannelsList');
+        const greetingEl = document.getElementById("greeting")
+
+        const greetings = [
+            "今日も頑張ろうね！", "何か面白い記事を読んでみて！勉強になるはずだからね", "動画を観よう！",
+            "読めば読むほど頭が良くなるでしょ？", "あんき復習を忘れないでね！"
+        ]
+
+        // Configuration
+        let config = {
+            ankiServer: 'http://127.0.0.1:8765',
+            ankiDeck: '1 - Japanese Vocab Mining',
+            youtubeChannels: [
+                {
+                    "name": "かほの登山日記",
+                    "url": "https://www.youtube.com/@kaho_tozan",
+                    "image": "kaho.jpg"
+                },
+                {
+                    "name": "くが",
+                    "url": "https://www.youtube.com/@kuga1832",
+                    "image": "kuga.jpg"
+                },
+                {
+                    "name": "牛沢",
+                    "url": "https://www.youtube.com/@uszw",
+                    "image": "ushizawa.jpg"
+                }
+            ],
+            readArticles: [],
+            filteredWords: ["スペースX", "SpaceX", "Starship", "Elon"]
+        };
+
+        // Load config from localStorage
+        function loadConfig() {
+            const savedConfig = localStorage.getItem('japaneseDashboardConfig');
+            if (savedConfig) {
+                config = JSON.parse(savedConfig);
+                ankiServerInput.value = config.ankiServer;
+                ankiDeckInput.value = config.ankiDeck;
+            }
+        }
+
+        // Save config to localStorage
+        function saveConfig() {
+            localStorage.setItem('japaneseDashboardConfig', JSON.stringify(config));
+        }
+
+        // Toggle settings panels
+        ankiSettingsBtn.addEventListener('click', () => {
+            ankiSettingsPanel.classList.toggle('active');
+        });
+
+        closeAnkiSettingsBtn.addEventListener('click', () => {
+            ankiSettingsPanel.classList.toggle('active');
+        });
+
+        // Save settings
+        saveAnkiSettingsBtn.addEventListener('click', () => {
+            config.ankiServer = ankiServerInput.value;
+            config.ankiDeck = ankiDeckInput.value;
+            saveConfig();
+            ankiSettingsPanel.classList.remove('active');
+            fetchAnkiData();
+        });
+
+        // Refresh data
+        refreshAnkiBtn.addEventListener('click', fetchAnkiData);
+
+        // Fetch Anki data
+        async function fetchAnkiData() {
+            try {
+                // Get deck stats
+                const statsResponse = await fetch(config.ankiServer, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'getDeckStats',
+                        version: 6,
+                        params: {
+                            decks: [config.ankiDeck]
+                        }
+                    })
+                });
+
+                const statsData = await statsResponse.json();
+                const deckStats = Object.values(statsData.result)[0];
+
+                // Hide/show 乙 if we are done with Anki for now :-)
+                if (!deckStats.review_count && !deckStats.new_count && !deckStats.learn_count) {
+                    console.log("all 0s for anki")
+                    document.getElementById("ankiComplete").style.display = "flex";
+                    document.getElementById("statsContainer").style.display = "none";
+                } else {
+                    document.getElementById("ankiComplete").style.display = "none";
+                    document.getElementById("statsContainer").style.display = "flex";
+                }
+
+                reviewCountEl.textContent = deckStats.review_count;
+                newCountEl.textContent = deckStats.new_count;
+                learningCountEl.textContent = deckStats.learn_count;
+
+                // Get today's added notes
+                const notesResponse = await fetch(config.ankiServer, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'notesInfo',
+                        version: 6,
+                        params: {
+                            query: `deck:"${config.ankiDeck}" is:new added:1`
+                        }
+                    })
+                });
+
+                const notesData = await notesResponse.json();
+                const notes = notesData.result;
+
+                // Display added words
+                if (notes.length === 0) {
+                    addedWordsEl.innerHTML = '<div class="loading">新しい言葉を探しましょうね！</div>';
+                } else {
+                    addedWordsEl.innerHTML = '';
+                    notes.forEach(note => addedWordsEl.appendChild(html(`
+                            <div class="word-item">${note.fields.Expression.value}</div>
+                    `)));
+                }
+            } catch (error) {
+                console.error('Error fetching Anki data:', error);
+                addedWordsEl.innerHTML = '<div class="error">Failed to load Anki data. Please check your settings, and ensure Anki is running with AnkiConnect installed.</div>';
+            }
+        }
+
+        // Fetch articles
+        async function fetchArticles() {
+            try {
+                const response = await fetch(`/articles`);
+                const data = await response.json();
+
+                if (!data.results || data.results.length === 0) {
+                    articlesContainer.innerHTML = '<div class="loading">No articles available</div>';
+                    return;
+                }
+
+                let articles = []
+                data.results.forEach(website => website.articles.forEach(article => articles.push(article)))
+                shuffle(articles)
+
+                articlesContainer.innerHTML = '';
+                const articlesGrid = document.createElement('div');
+                articlesGrid.className = 'articles-grid';
+
+                // Display only unread articles
+                articles.forEach(article => {
+                    if (!config.readArticles.includes(article.link)) {
+                        articlesGrid.appendChild(html(`
+                            <a class="article-card" href="${article.link}" target="_blank">
+                                <div class="article-image-container">
+                                    <img class="article-image" src="${article.image}"></img>
+                                    <div class="article-read-check-overlay">
+                                        <div id="${article.link}" class="article-read-checkbox"></div>
+                                    </div>
+                                </div>
+                                <div class="article-body">
+                                    <div class="article-title">${article.title}</div>
+                                    <div class="article-summary">${article.summary}</div>
+                                </div>
+                            </a>
+                        `))
+                    }
+                });
+
+                articlesContainer.appendChild(articlesGrid);
+
+                // Add checked listener to each article
+                articles.forEach(article => {
+                    if (!config.readArticles.includes(article.link)) {
+                        document.getElementById(article.link).addEventListener("click", e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.target.classList.toggle("checked");
+                            e.target.innerHTML = `<i class="fa fa-check></i>`;
+                            e.target.closest(".article-card").style.display = "none";
+                            config.readArticles.push(article.link);
+                            saveConfig()
+                        }, true)
+                    }
+                })
+
+            } catch (error) {
+                console.error('Error fetching articles:', error);
+                articlesContainer.innerHTML = '<div class="error">Failed to load articles.</div>';
+            }
+
+        }
+
+        config.youtubeChannels.forEach(channel => youtubeChannelsList.appendChild(html(`
+                <a  class="youtube-channel" href="${channel.url}" target="_blank">
+                    <img alt="" class="youtube-image" src="/static/img/yt/${channel.image}"></img>
+                    <div class="youtube-name">${channel.name}</div>
+                </a>
+            `))
+        )
+
+        function setGreeting() {
+            greetingEl.innerHTML = greetings[Math.floor(Math.random() * greetings.length)]
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length;
+            while (currentIndex != 0) {
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+        }
+
+        function html(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html.trim();
+            return template.content.firstChild;
+        }
+
+        function initDashboard() {
+            loadConfig();
+            console.log(config)
+            Promise.all([
+                fetchAnkiData(),
+                fetchArticles()
+            ]).then(setGreeting);
+            startBubbles()
+        }
+
+        window.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+
+</html>
